@@ -3,69 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Research OS | Advanced Workspace</title>
+    <title>Research OS | Vercel Deployment</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root { --bg: #050505; --card: #121214; --accent: #00d4ff; }
-        body { background: var(--bg); color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        
-        /* Navbar & Sidebar style */
-        .sidebar { height: 100vh; background: #0c0c0e; border-right: 1px solid #222; position: fixed; width: 250px; padding: 20px; }
-        .main-content { margin-left: 250px; padding: 40px; }
-        
-        /* Card Style */
-        .paper-card { background: var(--card); border: 1px solid #222; border-radius: 12px; padding: 20px; transition: 0.3s; margin-bottom: 20px; }
-        .paper-card:hover { border-color: var(--accent); box-shadow: 0 0 20px rgba(0, 212, 255, 0.1); }
-        
-        /* Note Editor */
-        .editor-panel { border-left: 1px solid #222; height: 100vh; position: fixed; right: 0; width: 400px; background: #0c0c0e; padding: 20px; display: none; }
-        .note-input { background: transparent; border: none; color: #ccc; width: 100%; height: 80%; outline: none; font-size: 14px; line-height: 1.6; }
-        
-        .btn-cyber { background: var(--accent); color: #000; font-weight: 800; border-radius: 4px; border: none; padding: 8px 20px; }
-        .topic-pill { font-size: 10px; background: #1e293b; color: var(--accent); padding: 4px 10px; border-radius: 4px; font-weight: bold; }
+        body { background: var(--bg); color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .sidebar { height: 100vh; background: #0c0c0e; border-right: 1px solid #222; position: fixed; width: 260px; padding: 25px; z-index: 100; }
+        .main-content { margin-left: 260px; padding: 40px; transition: 0.3s; }
+        .paper-card { background: var(--card); border: 1px solid #222; border-radius: 12px; padding: 20px; transition: 0.3s; margin-bottom: 20px; cursor: pointer; }
+        .paper-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+        .editor-panel { border-left: 1px solid #222; height: 100vh; position: fixed; right: 0; top: 0; width: 450px; background: #0c0c0e; padding: 25px; display: none; z-index: 1000; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
+        .note-input { background: transparent; border: none; color: #cbd5e1; width: 100%; height: 75%; outline: none; font-size: 14px; resize: none; margin-top: 20px; }
+        .topic-pill { font-size: 10px; background: rgba(0, 212, 255, 0.1); color: var(--accent); padding: 4px 10px; border-radius: 4px; font-weight: bold; letter-spacing: 1px; }
+        .btn-cyber { background: var(--accent); color: #000; font-weight: 800; border-radius: 6px; border: none; padding: 10px 20px; width: 100%; }
     </style>
 </head>
 <body>
 
-<div class="sidebar d-none d-lg-block">
-    <h4 class="fw-bold mb-4">VAULT <span class="text-info">v2</span></h4>
+<div class="sidebar">
+    <h4 class="fw-bold mb-5 text-info italic">VAULT <span class="text-white">v2</span></h4>
     <div class="mb-4">
-        <small class="text-uppercase text-muted">Quick Access</small>
-        <div class="mt-2 d-grid gap-2">
-            <button class="btn btn-dark text-start btn-sm" onclick="filterPapers('ALL')">All Papers</button>
-            <div id="topicFilterList"></div>
+        <small class="text-uppercase text-muted fw-bold" style="font-size: 10px;">Workspace</small>
+        <div class="mt-3 d-grid gap-2">
+            <button class="btn btn-dark text-start border-0 py-2 shadow-sm" onclick="showAll()">All Research</button>
         </div>
     </div>
-    <button class="btn btn-cyber w-100 mt-5" data-bs-toggle="modal" data-bs-target="#uploadModal">NEW RESEARCH</button>
+    <button class="btn btn-cyber mt-4" data-bs-toggle="modal" data-bs-target="#uploadModal">NEW PAPER</button>
 </div>
 
 <div class="main-content">
     <div class="d-flex justify-content-between align-items-center mb-5">
-        <input type="text" id="searchBar" class="form-control w-50 bg-dark text-white border-0" placeholder="Search by title or topic..." onkeyup="search()">
+        <input type="text" id="searchBar" class="form-control w-50 bg-dark text-white border-0 py-2 px-3" placeholder="Search title or topic..." onkeyup="search()">
     </div>
-
     <div id="paperGrid" class="row">
-        </div>
+        <div class="text-center py-5 text-muted">Connecting to Vault...</div>
+    </div>
 </div>
 
 <div id="editor" class="editor-panel">
-    <div class="d-flex justify-content-between mb-3 border-bottom pb-2 border-secondary">
-        <h6 id="editorTitle" class="m-0">Research Notes</h6>
-        <button class="btn btn-sm btn-outline-danger border-0" onclick="closeEditor()">X</button>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h6 id="editorTitle" class="m-0 fw-bold text-info truncate w-75">Research Notes</h6>
+        <button class="btn btn-sm btn-dark rounded-circle" onclick="closeEditor()"><i data-lucide="x" size="16"></i></button>
     </div>
-    <textarea id="noteInput" class="note-input" placeholder="Start typing your findings..."></textarea>
-    <div class="text-end mt-2"><small class="text-success" id="saveStatus">Auto-saved</small></div>
+    <div class="mb-3"><a id="pdfLink" href="#" target="_blank" class="btn btn-outline-info btn-sm w-100">Open PDF in New Tab</a></div>
+    <textarea id="noteInput" class="note-input" placeholder="Analyze and record your findings here..."></textarea>
+    <div class="text-end mt-3"><span id="saveStatus" class="badge bg-success opacity-75">Sync Ready</span></div>
 </div>
 
 <div class="modal fade" id="uploadModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content bg-dark border-secondary">
+        <div class="modal-content bg-dark border-secondary shadow-lg">
             <div class="modal-body p-4">
-                <h6>Add Paper</h6>
-                <input type="text" id="topicIn" class="form-control bg-secondary text-white border-0 my-3" placeholder="Topic (e.g. YOLO, PPO)">
-                <input type="file" id="fileIn" class="form-control bg-secondary text-white border-0">
-                <button onclick="handleUpload()" id="upBtn" class="btn btn-info w-100 mt-4 fw-bold text-dark">UPLOAD</button>
+                <h6 class="mb-4 fw-bold">Import Research Data</h6>
+                <input type="text" id="topicIn" class="form-control bg-secondary text-white border-0 mb-3" placeholder="Category (e.g., Deep Learning, NLP)">
+                <input type="file" id="fileIn" class="form-control bg-secondary text-white border-0 mb-4" accept=".pdf">
+                <button onclick="handleUpload()" id="upBtn" class="btn btn-info w-100 fw-bold text-dark py-2">DEPLOY TO DRIVE</button>
             </div>
         </div>
     </div>
@@ -86,27 +79,23 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxpyn5w9rEdYOzvchJmVNJeIv4lEcM2V0P-3KcqnoRl7TsClXBGaGmeQAN66s39t-kd/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyfdnweJcCdvKmNTS_wdKyHXfVSfXt_h8FZFAd4Y7Od0Y228zilmwrCOwRb7iJDiI3O/exec";
     let activePaperId = null;
 
-    // Real-time Load
     onSnapshot(query(collection(db, "papers"), orderBy("createdAt", "desc")), (snap) => {
         const grid = document.getElementById('paperGrid');
-        grid.innerHTML = '';
+        grid.innerHTML = snap.empty ? '<div class="text-center text-muted py-5">Empty Vault</div>' : '';
         snap.forEach(docSnap => {
             const data = docSnap.data();
             grid.innerHTML += `
-                <div class="col-md-6 paper-item" data-title="${data.title.toLowerCase()}" data-topic="${data.topic.toLowerCase()}">
-                    <div class="paper-card">
-                        <div class="d-flex justify-content-between mb-3">
+                <div class="col-md-6 mb-4 paper-item" data-title="${data.title.toLowerCase()}" data-topic="${data.topic.toLowerCase()}">
+                    <div class="paper-card" onclick="openEditor('${docSnap.id}', '${data.title.replace(/'/g, "\\'")}', \`${data.notes}\`, '${data.link}')">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
                             <span class="topic-pill">${data.topic}</span>
-                            <div class="d-flex gap-2">
-                                <a href="${data.link}" target="_blank" class="text-info"><i data-lucide="link"></i></a>
-                                <button onclick="openEditor('${docSnap.id}', '${data.title.replace(/'/g, "\\'")}', \`${data.notes}\`)" class="btn btn-sm p-0 text-white"><i data-lucide="edit-3"></i></button>
-                            </div>
+                            <i data-lucide="chevron-right" class="text-muted" size="18"></i>
                         </div>
-                        <h6 class="fw-bold mb-1">${data.title}</h6>
-                        <p class="small text-muted line-clamp-1">${data.notes ? data.notes.substring(0, 50) + '...' : 'No notes yet.'}</p>
+                        <h6 class="fw-bold mb-2">${data.title}</h6>
+                        <p class="small text-muted mb-0 line-clamp-1">${data.notes ? data.notes.substring(0, 60) + '...' : 'No annotations added yet.'}</p>
                     </div>
                 </div>
             `;
@@ -116,9 +105,9 @@
 
     window.handleUpload = async () => {
         const file = document.getElementById('fileIn').files[0];
-        const topic = document.getElementById('topicIn').value || "GENERAL";
+        const topic = document.getElementById('topicIn').value || "UNCATEGORIZED";
         const upBtn = document.getElementById('upBtn');
-        if(!file) return;
+        if(!file) return alert("Select a PDF");
 
         upBtn.innerText = "UPLOADING...";
         upBtn.disabled = true;
@@ -128,51 +117,47 @@
         reader.onload = async () => {
             const base64 = reader.result.split(',')[1];
             try {
-                const driveRes = await fetch(APPS_SCRIPT_URL, {
+                const res = await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
                     body: JSON.stringify({ base64: base64, type: file.type, name: file.name })
                 });
-                const driveData = await driveRes.json();
-                
-                if(driveData.status === "success") {
-                    // Firestore සේව් කිරීම (මෙතනදී තමයි වැදගත්ම කොටස)
+                const drive = await res.json();
+                if(drive.status === "success") {
                     await addDoc(collection(db, "papers"), {
                         title: file.name,
                         topic: topic.toUpperCase(),
-                        link: driveData.link,
+                        link: drive.link,
                         notes: "",
                         createdAt: serverTimestamp()
                     });
-                    location.reload();
+                    bootstrap.Modal.getInstance(document.getElementById('uploadModal')).hide();
                 }
-            } catch (err) { alert("Error: " + err.message); }
+            } catch (err) { alert("CORS Error - check Apps Script deployment!"); }
+            finally { upBtn.innerText = "DEPLOY TO DRIVE"; upBtn.disabled = false; }
         };
     };
 
-    // Note Editor Functions
-    window.openEditor = (id, title, notes) => {
+    window.openEditor = (id, title, notes, link) => {
         activePaperId = id;
         document.getElementById('editor').style.display = 'block';
         document.getElementById('editorTitle').innerText = title;
         document.getElementById('noteInput').value = notes === "undefined" ? "" : notes;
+        document.getElementById('pdfLink').href = link;
     };
 
     window.closeEditor = () => { document.getElementById('editor').style.display = 'none'; };
 
-    // Auto-save Notes
     document.getElementById('noteInput').addEventListener('input', async (e) => {
         if(!activePaperId) return;
-        document.getElementById('saveStatus').innerText = "Saving...";
+        document.getElementById('saveStatus').innerText = "Syncing...";
         await updateDoc(doc(db, "papers", activePaperId), { notes: e.target.value });
-        document.getElementById('saveStatus').innerText = "Saved";
+        document.getElementById('saveStatus').innerText = "Cloud Synced";
     });
 
-    // Search function
     window.search = () => {
         const q = document.getElementById('searchBar').value.toLowerCase();
         document.querySelectorAll('.paper-item').forEach(el => {
-            const match = el.dataset.title.includes(q) || el.dataset.topic.includes(q);
-            el.style.display = match ? 'block' : 'none';
+            el.style.display = (el.dataset.title.includes(q) || el.dataset.topic.includes(q)) ? 'block' : 'none';
         });
     };
 </script>
